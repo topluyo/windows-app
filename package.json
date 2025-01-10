@@ -1,0 +1,19 @@
+{
+  "name": "topluyo",
+  "version": "1.0.0",
+  "description": "A powerfull Community App.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "installer": "electron-builder --win --x64"
+  },
+  "author": "Hasan Delibaş,Topluyo Team",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "node-global-key-listener": "^0.3.0"
+  }
+}

@@ -1,0 +1,1 @@
+npx electron-builder --dir && npx electron-builder --win --x64
