@@ -29,8 +29,8 @@ function createWindow () {
   // ekran paylaşımı
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
     desktopCapturer.getSources({types: ['screen']}).then((sources) => {
-        callback({video: sources[0]});
-     });
+      callback({ video: sources[0], audio: 'loopback' })
+    });
  });
 
 
@@ -75,7 +75,7 @@ function createWindow () {
 
   
   // - Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 }
 
 app.setLoginItemSettings({
