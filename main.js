@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain, desktopCapturer, session} = require('electron')
+const {app, BrowserWindow, ipcMain, desktopCapturer, session, shell} = require('electron')
 const path = require('path')
 const {GlobalKeyboardListener} = require("node-global-key-listener");
 
@@ -26,35 +26,31 @@ function createWindow () {
     }
   })
 
+  // ekran paylaşımı
   session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
-    desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
-      // Grant access to the first screen found.
-      callback({ video: sources[0], audio: 'loopback' })
-    })
-    // If true, use the system picker if available.
-    // Note: this is currently experimental. If the system picker
-    // is available, it will be used and the media request handler
-    // will not be invoked.
-  }, { useSystemPicker: true })
+    desktopCapturer.getSources({types: ['screen']}).then((sources) => {
+        callback({video: sources[0]});
+     });
+ });
+
 
   mainWindow.loadURL('https://topluyo.com')
 
+  // harici linke gitme olayı
   mainWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
     return { action: 'deny' }
   })
 
+  // tam çıkış
   mainWindow.on('close', function(e) { 
     e.preventDefault();
     mainWindow.destroy();
     if (process.platform !== 'darwin') app.quit()
   });
-
   
-
-  
-  
+  // klavye kısayolları
   const globalKeyboardListener = new GlobalKeyboardListener();
-
   let lastDown = {}
   let lastEvent = {}
   globalKeyboardListener.addListener(function (event, down) {
@@ -79,7 +75,7 @@ function createWindow () {
 
   
   // - Open the DevTools.
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 app.setLoginItemSettings({
