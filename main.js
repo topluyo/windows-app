@@ -82,7 +82,15 @@ function createWindow () {
   //mainWindow.webContents.openDevTools()
 }
 
+app.setLoginItemSettings({
+  openAtLogin: true    
+})
+
 app.whenReady().then(() => {
+  if (!app.requestSingleInstanceLock()) {
+    app.quit();
+    return;
+  }
   createWindow()
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
