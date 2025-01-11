@@ -6,12 +6,12 @@ const {GlobalKeyboardListener} = require("node-global-key-listener");
 
 function createWindow () {
   mainWindow = new BrowserWindow({
-    width: 600,
-    height: 480,
+    width: 720,
+    height: 520,
     //fullscreen: true,
     //width: 1200,
     //height: 800,
-    title: "topluyo",
+    title: "Topluyo",
     frame: false,
     closable: true,
     autoHideMenuBar: true,

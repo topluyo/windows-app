@@ -1,6 +1,6 @@
 {
-  "name": "Topluyo",
-  "version": "1.0.1",
+  "name": "topluyo",
+  "version": "2025.01.11",
   "description": "Topluyo",
   "main": "main.js",
   "scripts": {
@@ -15,5 +15,9 @@
   },
   "dependencies": {
     "node-global-key-listener": "^0.3.0"
+  },
+  "build": {
+    "appId": "com.topluyo.app",
+    "productName": "Topluyo"
   }
 }
