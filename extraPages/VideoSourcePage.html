@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Select Screen</title>
+    <style>
+      /*TODO SET NEW STYLE HERE */
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .source-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .source-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 120px;
+        height: 160px;
+        position: relative;
+      }
+      .source-item video {
+        max-width: 100px;
+        max-height: 100px;
+        margin-bottom: 5px;
+      }
+      .sound-button {
+        background-color: #ccc;
+        border: none;
+        border-radius: 5px;
+        padding: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="buttons">
+        <button id="windowsButton">Windows</button>
+        <button id="screensButton">Screens</button>
+      </div>
+      <div id="sourceList" class="source-list"></div>
+      <button id="soundButton" class="sound-button">🔊</button>
+    </div>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const windowsButton = document.getElementById("windowsButton");
+        const screensButton = document.getElementById("screensButton");
+        const sourceList = document.getElementById("sourceList");
+        const soundButton = document.getElementById("soundButton");
+        let isAudioEnabled = true;
+
+        soundButton.onclick = () => {
+          isAudioEnabled = !isAudioEnabled;
+          soundButton.innerText = isAudioEnabled ?"🔊" : "🔇" ;
+          console.log(isAudioEnabled);
+        };
+
+        const getSourcesAndSelect = async (type) => {
+          const sources = await window.streamScreen.getSources();
+          const filteredSources = sources[type];
+          sourceList.innerHTML = "";
+          filteredSources.forEach(async (source) => {
+            const sourceItem = document.createElement("div");
+            sourceItem.className = "source-item";
+            const video = document.createElement("video");
+            video.autoplay = true;
+            video.muted = true;
+            video.playsInline = true;
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+              audio: false,
+              video: {
+                mandatory: {
+                  chromeMediaSource: 'desktop',
+                  chromeMediaSourceId: source.id,
+                  maxWidth: 100,
+                  maxHeight: 100
+                }
+              }
+            });
+
+            video.srcObject = stream;
+
+            const name = document.createElement("div");
+            name.innerText = source.name;
+            sourceItem.appendChild(video);
+            sourceItem.appendChild(name);
+            sourceItem.onclick = () => {
+              window.streamScreen.setSource(type, source.id, isAudioEnabled);
+              window.close();
+            };
+            sourceList.appendChild(sourceItem);
+          });
+        };
+
+        windowsButton.onclick = () => getSourcesAndSelect("windows");
+        screensButton.onclick = () => getSourcesAndSelect("screens");
+
+        // Initial load
+        getSourcesAndSelect("windows");
+      });
+    </script>
+  </body>
+</html>
