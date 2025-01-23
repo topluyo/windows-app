@@ -15,14 +15,95 @@ function showSourceSelectionWindow(sources, callback) {
 
   const htmlContent = `
     <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ekran Kaynağı Seçimi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        h1 {
+            margin: 20px 0;
+            color: #0056b3;
+        }
+
+        #source-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .source-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .source-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .source-item img {
+            max-width: 100px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .source-item button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #0056b3;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .source-item button:hover {
+            background-color: #003d82;
+        }
+
+        #start-sharing {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #start-sharing:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
     <h1>Ekran Paylaşımı</h1>
     <div id="source-list"></div>
     <button id="start-sharing">Ekran Paylaşımını Başlat</button>
+
     <script>
         const { ipcRenderer } = require('electron');
 
@@ -32,18 +113,25 @@ function showSourceSelectionWindow(sources, callback) {
             sourceList.innerHTML = '';
 
             sources.forEach((source) => {
-                const button = document.createElement('button');
-                button.textContent = source.name;
-                button.onclick = () => selectSource(source);
-                sourceList.appendChild(button);
+                const sourceItem = document.createElement('div');
+                sourceItem.className = 'source-item';
 
                 if (source.thumbnail) {
                     const img = document.createElement('img');
                     img.src = source.thumbnail;
-                    img.style.width = '100px';
-                    img.style.margin = '5px';
-                    sourceList.appendChild(img);
+                    sourceItem.appendChild(img);
                 }
+
+                const sourceName = document.createElement('div');
+                sourceName.textContent = source.name;
+                sourceItem.appendChild(sourceName);
+
+                const selectButton = document.createElement('button');
+                selectButton.textContent = 'Seç';
+                selectButton.onclick = () => selectSource(source);
+                sourceItem.appendChild(selectButton);
+
+                sourceList.appendChild(sourceItem);
             });
         }
 
@@ -67,6 +155,7 @@ function showSourceSelectionWindow(sources, callback) {
     </script>
 </body>
 </html>
+
 
   `;
   selectionWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent));
