@@ -5,77 +5,30 @@ const { GlobalKeyboardListener } = require("node-global-key-listener");
 
 function showSourceSelectionWindow(sources, callback) {
   const selectionWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 620,
+    height: 400,
+    autoHideMenuBar:true,
+    icon: path.join(app.getAppPath(), 'topluyo.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
 
-  const htmlContent = `
-    <!DOCTYPE html>
-<html>
-<head>
-    <title>Ekran Kaynağı Seçimi</title>
-</head>
-<body>
-    <h1>Ekran Paylaşımı</h1>
-    <div id="source-list"></div>
-    <button id="start-sharing">Ekran Paylaşımını Başlat</button>
-    <script>
-        const { ipcRenderer } = require('electron');
+  selectionWindow.loadFile("./ScreenShare.html");
 
-        async function listSources() {
-            const sources = await ipcRenderer.invoke('get-sources');
-            const sourceList = document.getElementById('source-list');
-            sourceList.innerHTML = '';
-
-            sources.forEach((source) => {
-                const button = document.createElement('button');
-                button.textContent = source.name;
-                button.onclick = () => selectSource(source);
-                sourceList.appendChild(button);
-
-                if (source.thumbnail) {
-                    const img = document.createElement('img');
-                    img.src = source.thumbnail;
-                    img.style.width = '100px';
-                    img.style.margin = '5px';
-                    sourceList.appendChild(img);
-                }
-            });
-        }
-
-        let selectedSource;
-
-        function selectSource(source) {
-            selectedSource = source;
-            console.log('Seçilen kaynak:', source.name);
-        }
-
-        document.getElementById('start-sharing').addEventListener('click', () => {
-            if (!selectedSource) {
-                alert('Lütfen bir kaynak seçin!');
-                return;
-            }
-
-            ipcRenderer.send('source-selected', selectedSource.id);
-        });
-
-        listSources();
-    </script>
-</body>
-</html>
-
-  `;
-  selectionWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent));
-
-  // Seçim yapıldığında mesaj yakalama
-  ipcMain.once('source-selected', (event, sourceId) => {
-    selectionWindow.close(); // Seçim ekranını kapat
-    callback(sourceId); // Callback'e seçilen kaynağı döndür
+  let success = false
+  ipcMain.once('source-selected', (event, data) => {
+    callback(data);
+    success=true
+    try{ selectionWindow.close(); }catch(e){}
   });
+
+  selectionWindow.on("closed",function(){
+    if(success==false){
+      callback({id:false})
+    }
+  })
 }
 
 function createWindow() {
@@ -95,15 +48,24 @@ function createWindow() {
     }
   });
 
- session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
-  desktopCapturer.getSources({ types: ['screen', 'window'], thumbnailSize: { width: 300, height: 300 } }).then(sources => {
-    showSourceSelectionWindow(sources, selectedSourceId => {
-      const selectedSource = sources.find(source => source.id === selectedSourceId);
-      callback({ video: selectedSource, audio: 'loopback' });
-    });
-  });
-});
+  
+  session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
+    desktopCapturer.getSources({ types: ['screen', 'window'], thumbnailSize: { width: 300, height: 300 } }).then(sources => {
+      showSourceSelectionWindow(sources, data => {
+        let id = data.id
+        let audio = data.audio ? "loopback" : "loopbackWithMute"
+        const selectedSource = sources.find(source => source.id === id);
+        if(id){
+          try{ callback({ video: selectedSource, audio: audio }); }catch(e){}
+        }else{
+          try{ callback(null) }catch(e){ }
+        }
+      });
+    }).catch(e=>{
 
+    });
+  },{useSystemPicker:false});
+  
 
   ipcMain.handle('get-sources', async () => {
     const sources = await desktopCapturer.getSources({ types: ['screen', 'window'], fetchWindowIcons: true });
@@ -114,7 +76,7 @@ function createWindow() {
     }));
   });
 
-  mainWindow.loadURL('https://topluyo.com');
+  mainWindow.loadURL('https://topluyo.com/');
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
@@ -147,6 +109,9 @@ function createWindow() {
     let keyboardEvent = { type, ctrlKey, altKey, metaKey, shiftKey, code };
     mainWindow.webContents.send('keyaction', keyboardEvent);
   });
+
+  //!! Bu satırı Silme - Open the DevTools. !!//
+  // mainWindow.webContents.openDevTools()
 }
 
 app.setLoginItemSettings({

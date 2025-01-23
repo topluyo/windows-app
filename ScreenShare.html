@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ekran Kaynağı Seçimi</title>
+</head>
+<body>
+    <style>
+        *{
+            box-sizing: border-box;
+            font-family: system-ui;
+            line-height: 100%;
+        }
+        html{
+            height: 100%;
+        }
+
+        body{
+            background: #FFF;
+            color:#111;
+            font-family: system-ui;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        .element img{
+            border-radius: 4px;
+            height: 80px;
+            width: 120px;
+            object-fit: cover;
+        }
+        .element{
+            border: 3px solid #1113;
+            border-radius: 8px;
+            padding: 8px;
+            width: 142px;
+        }
+        .element.selected{
+            border: 3px solid #17F;
+        }
+        .element div{
+            white-space: pre;
+            overflow: hidden;
+            font-size:.8em;
+        }
+        #source-list{
+            display: flex;
+            flex-direction: row;
+            gap: .5em;
+            flex-wrap: wrap;
+        }
+        button{
+            background-color: #17F;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size:1em;
+            cursor: pointer;
+            padding: .5em 2em;
+        }
+        button:hover{
+            background-color: #19F
+        }
+
+
+        input[switch]{
+  appearance:none;
+  display:inline-flex;
+  align-items:center;
+  position:relative;
+  vertical-align:middle;
+  cursor:pointer;
+  font-size:1em;
+}
+input[switch]:before{
+  content : "";
+  display : block;
+  width   : 3em;
+  height  : 1.5em;
+  background:#0002;
+  border-radius:1em;
+  transition:all .3s;
+}
+input[switch]:checked:before{
+  background:#17F;
+}
+input[switch]:after{
+  content:attr(switch);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#FFF;
+  position:absolute;
+  font-size:0.75em;
+  left:0.2em;top:0.2em;
+  width:1.6em;
+  height:1.6em;
+  border-radius:100%;
+  transition:all .3s;
+  
+}
+input[switch]:checked:after{
+  left:2.2em;
+}
+
+
+    </style>
+    <div id="source-list" style="padding:.5em;"></div>
+    <div style="flex:1;"></div>
+    <div style="display:flex;flex-direction: row;justify-content: space-between;padding: .5em;">
+        <div>Sesi Paylaş : <input id="audio" type="checkbox" switch="🔊"></div>
+        <button id="start-sharing">Ekran Paylaşımını Başlat</button>
+    </div>
+    
+    
+
+    
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        async function listSources() {
+            sources = await ipcRenderer.invoke('get-sources');
+            const sourceList = document.getElementById('source-list');
+            sourceList.innerHTML = '';
+
+            sources.forEach((source) => {
+                
+                let html;
+                if (source.thumbnail) {
+                    html = `<img src='${source.thumbnail}'><div>${source.name}</div>`;
+                }else{
+                    html = `<div>${source.name}</div>`;
+                }
+                let element = document.createElement("div")
+                element.classList.add("element")
+                element.innerHTML = html
+                element.onclick = () => {
+                    Array.from(document.querySelectorAll(".element")).map(e=>e.classList.remove("selected"))
+                    element.classList.add("selected")
+                    selectSource(source);
+                }
+                sourceList.appendChild(element);
+            });
+        }
+
+        let selectedSource;
+
+        function selectSource(source) {
+            selectedSource = source;
+            console.log('Seçilen kaynak:', source.name);
+        }
+
+        document.getElementById('start-sharing').addEventListener('click', () => {
+            if (!selectedSource) {
+                alert('Lütfen bir kaynak seçin!');
+                return;
+            }
+
+            ipcRenderer.send('source-selected', {id:selectedSource.id,audio:document.querySelector("#audio").checked});
+        });
+
+        listSources();
+    </script>
+</body>
+</html>
