@@ -53,10 +53,11 @@ function createWindow() {
     desktopCapturer.getSources({ types: ['screen', 'window'], thumbnailSize: { width: 300, height: 300 } }).then(sources => {
       showSourceSelectionWindow(sources, data => {
         let id = data.id
-        let audio = data.audio ? "loopback" : "loopbackWithMute"
-        const selectedSource = sources.find(source => source.id === id);
         if(id){
-          try{ callback({ video: selectedSource, audio: audio }); }catch(e){}
+          const source = sources.find(source => source.id === id);
+          let stream = {video: source}
+          if(data.audio) stream.audio = "loopback"
+          try{ callback(stream) }catch(e){}
         }else{
           try{ callback(null) }catch(e){ }
         }

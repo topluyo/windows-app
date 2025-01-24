@@ -1,6 +1,6 @@
 {
   "name": "topluyo",
-  "version": "2025.01.23.1512",
+  "version": "2025.01.24.2036",
   "description": "Topluyo",
   "main": "main.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "author": "Hasan Delibaş,Topluyo Team",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^33.3.1",
+    "electron": "^33.3.2",
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
