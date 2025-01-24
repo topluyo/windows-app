@@ -1,15 +1,25 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, desktopCapturer, session, shell } = require('electron');
-const path = require('path');
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  desktopCapturer,
+  session,
+  shell,
+} = require("electron");
+const path = require("path");
 const { GlobalKeyboardListener } = require("node-global-key-listener");
-const windowStateKeeper = require('electron-window-state');
+const windowStateKeeper = require("electron-window-state");
+
+let mainWindow;
+let loadingWindow;
 
 function showSourceSelectionWindow(sources, callback) {
   const selectionWindow = new BrowserWindow({
     width: 620,
     height: 400,
-    autoHideMenuBar:true,
-    icon: path.join(app.getAppPath(), 'topluyo.png'),
+    autoHideMenuBar: true,
+    icon: path.join(app.getAppPath(), "topluyo.png"),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -18,22 +28,24 @@ function showSourceSelectionWindow(sources, callback) {
 
   selectionWindow.loadFile("./ScreenShare.html");
 
-  let success = false
-  ipcMain.once('source-selected', (event, data) => {
+  let success = false;
+  ipcMain.once("source-selected", (event, data) => {
     callback(data);
-    success=true
-    try{ selectionWindow.close(); }catch(e){}
+    success = true;
+    try {
+      selectionWindow.close();
+    } catch (e) {}
   });
 
-  selectionWindow.on("closed",function(){
-    if(success==false){
-      callback({id:false})
+  selectionWindow.on("closed", function () {
+    if (success == false) {
+      callback({ id: false });
     }
-  })
+  });
 }
 
 app.setLoginItemSettings({
-  openAtLogin: true
+  openAtLogin: true,
 });
 
 app.whenReady().then(() => {
@@ -46,7 +58,8 @@ app.whenReady().then(() => {
     defaultHeight: 600,
   }); //* Load the previous state with fallback to defaults
   function createWindow() {
-    const mainWindow = new BrowserWindow({
+    //* create Main Window Settings
+    mainWindow = new BrowserWindow({
       x: mainWindowState.x,
       y: mainWindowState.y,
       width: mainWindowState.width,
@@ -55,94 +68,158 @@ app.whenReady().then(() => {
       frame: false,
       closable: true,
       autoHideMenuBar: true,
-      icon: path.join(app.getAppPath(), 'topluyo.png'),
+      icon: path.join(app.getAppPath(), "topluyo.png"),
       webPreferences: {
         allowRunningInsecureContent: true,
         enableRemoteModule: true,
         contextIsolation: false,
-        preload: path.join(app.getAppPath(), 'preload.js'),
-      }
+        preload: path.join(app.getAppPath(), "preload.js"),
+      },
     });
 
     mainWindowState.manage(mainWindow);
-  
-    
-    session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
-      desktopCapturer.getSources({ types: ['screen', 'window'], thumbnailSize: { width: 300, height: 300 } }).then(sources => {
-        showSourceSelectionWindow(sources, data => {
-          let id = data.id
-          if(id){
-            const source = sources.find(source => source.id === id);
-            let stream = {video: source}
-            if(data.audio) stream.audio = "loopback"
-            try{ callback(stream) }catch(e){}
-          }else{
-            try{ callback(null) }catch(e){ }
-          }
-        });
-      }).catch(e=>{
-  
+
+    session.defaultSession.setDisplayMediaRequestHandler(
+      (request, callback) => {
+        desktopCapturer
+          .getSources({
+            types: ["screen", "window"],
+            thumbnailSize: { width: 300, height: 300 },
+          })
+          .then((sources) => {
+            showSourceSelectionWindow(sources, (data) => {
+              let id = data.id;
+              if (id) {
+                const source = sources.find((source) => source.id === id);
+                let stream = { video: source };
+                if (data.audio) stream.audio = "loopback";
+                try {
+                  callback(stream);
+                } catch (e) {}
+              } else {
+                try {
+                  callback(null);
+                } catch (e) {}
+              }
+            });
+          })
+          .catch((e) => {});
+      },
+      { useSystemPicker: false }
+    );
+
+    ipcMain.handle("get-sources", async () => {
+      const sources = await desktopCapturer.getSources({
+        types: ["screen", "window"],
+        fetchWindowIcons: true,
       });
-    },{useSystemPicker:false});
-    
-  
-    ipcMain.handle('get-sources', async () => {
-      const sources = await desktopCapturer.getSources({ types: ['screen', 'window'], fetchWindowIcons: true });
-      return sources.map(source => ({
+      return sources.map((source) => ({
         id: source.id,
         name: source.name,
         thumbnail: source.thumbnail.toDataURL(),
       }));
     });
-  
-    mainWindow.loadURL('https://topluyo.com/');
-  
+
     mainWindow.webContents.setWindowOpenHandler((details) => {
       shell.openExternal(details.url);
-      return { action: 'deny' };
+      return { action: "deny" };
     });
-  
-    mainWindow.on('close', function (e) {
+
+    mainWindow.on("close", function (e) {
       e.preventDefault();
       mainWindow.destroy();
-      if (process.platform !== 'darwin') app.quit();
+      if (process.platform !== "darwin") app.quit();
     });
-  
+
     const globalKeyboardListener = new GlobalKeyboardListener();
     let lastDown = {};
     let lastEvent = {};
     globalKeyboardListener.addListener(function (event, down) {
-      if (JSON.stringify(lastDown) === JSON.stringify(down) &&
-          JSON.stringify(lastEvent.name) === JSON.stringify(event.name) &&
-          JSON.stringify(lastEvent.state) === JSON.stringify(event.state)) return;
-  
+      if (
+        JSON.stringify(lastDown) === JSON.stringify(down) &&
+        JSON.stringify(lastEvent.name) === JSON.stringify(event.name) &&
+        JSON.stringify(lastEvent.state) === JSON.stringify(event.state)
+      )
+        return;
+
       lastDown = down;
       lastEvent = event;
       let type = event.state === "DOWN" ? "keydown" : "keyup";
-      let ctrlKey = (down["LEFT CTRL"] || down["RIGHT CTRL"]) || false;
-      let altKey = (down["LEFT ALT"] || down["RIGHT ALT"]) || false;
-      let metaKey = (down["LEFT META"] || down["RIGHT META"]) || false;
-      let shiftKey = (down["LEFT SHIFT"] || down["RIGHT SHIFT"]) || false;
+      let ctrlKey = down["LEFT CTRL"] || down["RIGHT CTRL"] || false;
+      let altKey = down["LEFT ALT"] || down["RIGHT ALT"] || false;
+      let metaKey = down["LEFT META"] || down["RIGHT META"] || false;
+      let shiftKey = down["LEFT SHIFT"] || down["RIGHT SHIFT"] || false;
       let code = "Key" + event.name;
-  
+
       let keyboardEvent = { type, ctrlKey, altKey, metaKey, shiftKey, code };
-      mainWindow.webContents.send('keyaction', keyboardEvent);
+      mainWindow.webContents.send("keyaction", keyboardEvent);
     });
-  
+
     //!! Bu satırı Silme - Open the DevTools. !!//
     // mainWindow.webContents.openDevTools()
   }
+
+  function LoadingWindowCreate() {
+    //* create Loading Window Settings
+    loadingWindow = new BrowserWindow({
+      width: 400,
+      height: 300,
+      frame: false,
+      alwaysOnTop: true,
+      transparent: true,
+      resizable: false,
+      icon: path.join(app.getAppPath(), "topluyo.png"),
+    });
+    loadingWindow.loadFile("loading.html");
+    loadingWindow.hide();
+    loadingWindow.on("closed", () => {
+      loadingWindow = null;
+    });
+  }
+
+  const retryIntervals = [5000, 10000, 15000, 30000]; // first 4 retry intervals in ms
+  let currentRetry = 0;
+
+  //* call windows settings
+  LoadingWindowCreate();
   createWindow();
-  app.on('activate', function () {
+
+  //* show window function (if topluyor.com loaded successfully show main window)
+  const loadMainWindow = () => {
+    mainWindow
+      .loadURL("https://topluyo.com")
+      .then(() => {
+        loadingWindow.hide();
+        mainWindow.show();
+        currentRetry = 0;
+      })
+      .catch(() => {
+        loadingWindow.show();
+        mainWindow.hide();
+
+        const retryDelay = retryIntervals[currentRetry] || 30000;
+        currentRetry++;
+
+        setTimeout(() => {
+          loadMainWindow();
+        }, retryDelay);
+      });
+  };
+  //* call Loop
+  loadMainWindow();
+
+  app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-app.on('window-all-closed', function () {
+app.on("window-all-closed", function () {
   app.quit();
 });
 
-ipcMain.on("minimize", () => { BrowserWindow.getFocusedWindow().minimize(); });
+ipcMain.on("minimize", () => {
+  BrowserWindow.getFocusedWindow().minimize();
+});
 ipcMain.on("maximize", () => {
   const focusedWindow = BrowserWindow.getFocusedWindow();
   if (focusedWindow.isMaximized()) {
@@ -151,4 +228,6 @@ ipcMain.on("maximize", () => {
     focusedWindow.maximize();
   }
 });
-ipcMain.on("close", () => { BrowserWindow.getFocusedWindow().close(); });
+ipcMain.on("close", () => {
+  BrowserWindow.getFocusedWindow().close();
+});
