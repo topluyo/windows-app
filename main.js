@@ -35,7 +35,14 @@ function showSourceSelectionWindow(sources, callback) {
     success = true;
     try {
       selectionWindow.close();
-    } catch (e) {}
+    } catch (e) {
+      dialog.showMessageBox({
+        type: "error",
+        title: "Hata",
+        message:
+          "Ekran paylaşımı seçilirken bir hata oluştu. \n Detaylar: " + e,
+      });
+    }
   });
 
   selectionWindow.on("closed", function () {
@@ -98,15 +105,38 @@ app.whenReady().then(() => {
                 if (data.audio) stream.audio = "loopback";
                 try {
                   callback(stream);
-                } catch (e) {}
+                } catch (e) {
+                  dialog.showMessageBox({
+                    type: "error",
+                    title: "Hata",
+                    message:
+                      "Ekran paylaşımı sırasında bir hata oluştu. \n Detaylar: " +
+                      e,
+                  });
+                }
               } else {
                 try {
                   callback(null);
-                } catch (e) {}
+                } catch (e) {
+                  dialog.showMessageBox({
+                    type: "error",
+                    title: "Hata",
+                    message:
+                      "Ekran paylaşımı sırasında bir hata oluştu. \n Detaylar: " +
+                      e,
+                  });
+                }
               }
             });
           })
-          .catch((e) => {});
+          .catch((e) => {
+            dialog.showMessageBox({
+              type: "error",
+              title: "Hata",
+              message:
+                "Ekran paylaşımı sırasında bir hata oluştu. \n Detaylar: " + e,
+            });
+          });
       },
       { useSystemPicker: false }
     );
@@ -176,8 +206,10 @@ app.whenReady().then(() => {
     });
     loadingWindow.loadFile("loading.html");
     loadingWindow.hide();
-    loadingWindow.on("closed", () => {
-      loadingWindow = null;
+    loadingWindow.on("closed", (e) => {
+      e.preventDefault();
+      mainWindow.destroy();
+      if (process.platform !== "darwin") app.quit();
     });
   }
 
@@ -231,11 +263,6 @@ app.whenReady().then(() => {
       updateWindow.close();
       loadMainWindow();
     }
-    dialog.showMessageBox({
-      type: "info",
-      title: "Güncelleme Kontrol Ediliyor",
-      message: "Uygulama güncellemeleri kontrol ediliyor...",
-    })
 
     autoUpdater.on("checking-for-update", () => {
       console.log("Güncellemeler kontrol ediliyor...");
@@ -252,7 +279,7 @@ app.whenReady().then(() => {
         type: "error",
         title: "Güncelleme Hatası",
         message: "Güncelleme sırasında bir hata oluştu." + error,
-      })
+      });
 
       updateWindow.close();
       loadMainWindow();
@@ -269,9 +296,7 @@ app.whenReady().then(() => {
       autoUpdater.quitAndInstall();
     });
 
-    console.log("aaa");
-
-    autoUpdater.checkForUpdatesAndNotify().then((result) => {});
+    autoUpdater.checkForUpdatesAndNotify();
   }
 
   checkForUpdates();

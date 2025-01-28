@@ -29,7 +29,8 @@
     "files": [
       "build/**/*",
       "node_modules/**/*",
-      "main.js"
+      "main.js",
+      "preload.js"
     ],
     "win": {
       "target": "nsis",
@@ -45,7 +46,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "CilginSinek",
+        "owner": "topluyo",
         "repo": "windows-app"
       }
     ]
