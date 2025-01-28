@@ -6,13 +6,14 @@ const {
   desktopCapturer,
   session,
   shell,
+  dialog,
 } = require("electron");
 const path = require("path");
+const { autoUpdater } = require("electron-updater");
 const { GlobalKeyboardListener } = require("node-global-key-listener");
 const windowStateKeeper = require("electron-window-state");
 
-let mainWindow;
-let loadingWindow;
+let mainWindow, loadingWindow, updateWindow;
 
 function showSourceSelectionWindow(sources, callback) {
   const selectionWindow = new BrowserWindow({
@@ -78,6 +79,8 @@ app.whenReady().then(() => {
     });
 
     mainWindowState.manage(mainWindow);
+
+    mainWindow.hide();
 
     session.defaultSession.setDisplayMediaRequestHandler(
       (request, callback) => {
@@ -155,8 +158,9 @@ app.whenReady().then(() => {
       mainWindow.webContents.send("keyaction", keyboardEvent);
     });
 
-    //!! Bu satırı Silme - Open the DevTools. !!//
-    // mainWindow.webContents.openDevTools()
+    if (process.env.NODE_ENV === "development") {
+      mainWindow.webContents.openDevTools();
+    }
   }
 
   function LoadingWindowCreate() {
@@ -177,14 +181,29 @@ app.whenReady().then(() => {
     });
   }
 
-  const retryIntervals = [5000, 10000, 15000, 30000]; // first 4 retry intervals in ms
-  let currentRetry = 0;
-
   //* call windows settings
   LoadingWindowCreate();
   createWindow();
 
-  //* show window function (if topluyor.com loaded successfully show main window)
+  function createUpdateWindow() {
+    updateWindow = new BrowserWindow({
+      width: 400,
+      height: 300,
+      frame: false,
+      alwaysOnTop: true,
+      // transparent: true,
+      resizable: false,
+      icon: path.join(app.getAppPath(), "topluyo.png"),
+      webPreferences: {
+        contextIsolation: false,
+      },
+    });
+    updateWindow.loadFile("update.html");
+  }
+
+  const retryIntervals = [5000, 10000, 15000, 30000]; // first 4 retry intervals in ms
+  let currentRetry = 0;
+
   const loadMainWindow = () => {
     mainWindow
       .loadURL("https://topluyo.com")
@@ -205,8 +224,57 @@ app.whenReady().then(() => {
         }, retryDelay);
       });
   };
-  //* call Loop
-  loadMainWindow();
+
+  function checkForUpdates() {
+    createUpdateWindow();
+    if (process.env.NODE_ENV === "development") {
+      updateWindow.close();
+      loadMainWindow();
+    }
+    dialog.showMessageBox({
+      type: "info",
+      title: "Güncelleme Kontrol Ediliyor",
+      message: "Uygulama güncellemeleri kontrol ediliyor...",
+    })
+
+    autoUpdater.on("checking-for-update", () => {
+      console.log("Güncellemeler kontrol ediliyor...");
+    });
+
+    autoUpdater.on("update-available", () => {
+      console.log("Güncelleme bulundu. İndiriliyor...");
+    });
+
+    autoUpdater.on("error", (error) => {
+      console.error("Güncelleme hatası:", error);
+
+      dialog.showMessageBox({
+        type: "error",
+        title: "Güncelleme Hatası",
+        message: "Güncelleme sırasında bir hata oluştu." + error,
+      })
+
+      updateWindow.close();
+      loadMainWindow();
+    });
+
+    autoUpdater.on("update-not-available", () => {
+      console.log("Güncelleme bulunamadı.");
+      updateWindow.close();
+      loadMainWindow();
+    });
+
+    autoUpdater.on("update-downloaded", () => {
+      console.log("Güncelleme indirildi. Yeniden başlatılıyor...");
+      autoUpdater.quitAndInstall();
+    });
+
+    console.log("aaa");
+
+    autoUpdater.checkForUpdatesAndNotify().then((result) => {});
+  }
+
+  checkForUpdates();
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
