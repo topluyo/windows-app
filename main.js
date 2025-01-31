@@ -13,6 +13,14 @@ const { autoUpdater } = require("electron-updater");
 const { GlobalKeyboardListener } = require("node-global-key-listener");
 const windowStateKeeper = require("electron-window-state");
 
+// Uygulamanın mevcut sürümünü al
+const currentVersion = app.getVersion();
+
+// GitHub release URL'yi oluştur
+const repoOwner = "topluyo";
+const repoName = "windows-app";
+const updateBaseUrl = `https://github.com/${repoOwner}/${repoName}/releases/download/v${currentVersion}/`;
+
 let mainWindow, loadingWindow, updateWindow;
 
 function showSourceSelectionWindow(sources, callback) {
@@ -259,6 +267,10 @@ app.whenReady().then(() => {
 
   function checkForUpdates() {
     createUpdateWindow();
+    autoUpdater.setFeedURL({
+      provider: "generic",
+      url: updateBaseUrl,
+    });
     if (process.env.NODE_ENV === "development") {
       updateWindow.close();
       loadMainWindow();
