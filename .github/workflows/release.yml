@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'  # Sadece versiyon etiketlerine tepki verir (v1.0.0 gibi)
 
+permissions:
+  contents: write # add permission for organization
+
 jobs:
   build:
     runs-on: windows-latest
