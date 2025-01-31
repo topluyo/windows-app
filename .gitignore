@@ -3,3 +3,4 @@
 /out
 /.vscode
 .exe
+package-lock.json
