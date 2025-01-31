@@ -262,7 +262,10 @@ app.whenReady().then(() => {
     if (process.env.NODE_ENV === "development") {
       updateWindow.close();
       loadMainWindow();
+      return;
     }
+    autoUpdater.autoDownload = true; // Sessiz indir
+    autoUpdater.autoInstallOnAppQuit = false; // Uygulama kapanmadan yükleme
 
     autoUpdater.on("checking-for-update", () => {
       console.log("Güncellemeler kontrol ediliyor...");
@@ -292,8 +295,10 @@ app.whenReady().then(() => {
     });
 
     autoUpdater.on("update-downloaded", () => {
-      console.log("Güncelleme indirildi. Yeniden başlatılıyor...");
-      autoUpdater.quitAndInstall();
+      console.log("🎉 Güncelleme indirildi. Uygulama yeniden başlatılıyor...");
+      
+      updateWindow.close();
+      autoUpdater.quitAndInstall(true, true);
     });
 
     autoUpdater.checkForUpdatesAndNotify();

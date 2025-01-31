@@ -32,7 +32,8 @@
       "main.js",
       "preload.js",
       "*.html",
-      "icons/*"
+      "icons/*",
+      "*.rtf"
     ],
     "win": {
       "target": "nsis",
@@ -44,7 +45,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Topluyo"
+      "shortcutName": "Topluyo",
+      "license":"kullanici_sozlesmesi.rtf"
     },
     "publish": [
       {
