@@ -1,7 +1,7 @@
 # Topluyo Windows Uygulaması
 
 ![Topluyo Uygulama Görünümü](./icons/Img/TopluyoImage.jpg)
-![Topluyo Kullanıcı Arayüzü](./Icons/Img/TopluyoImageDark.jpg)
+![Topluyo Kullanıcı Arayüzü](./icons/Img/TopluyoImageDark.jpg)
 
 **Topluyo Windows Uygulaması**, Topluyo platformunun tüm özelliklerini Windows işletim sisteminde sorunsuz bir şekilde kullanmanızı sağlayan resmi masaüstü uygulamasıdır.
 
