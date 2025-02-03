@@ -6,6 +6,7 @@ const {
   checkForUpdates,
   loadMainWindow,
 } = require("./Windows");
+const {isSafeUrl} = require("./utils");
 
 let mainWindow, loadingWindow;
 

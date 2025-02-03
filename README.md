@@ -13,8 +13,8 @@
 
 ## Kurulum
 
-1. **İndir**: [Son sürümü indirin](https://github.com/topluyo/windows-app-exe/archive/refs/heads/main.zip).
-2. **Çalıştır**: İndirilen `Topluyo Setup 2025.1.1-1.2035.exe` dosyasını açın.
+1. **İndir**: [Son sürümü indirin](https://github.com/topluyo/windows-app/releases/latest) ardından `Topluyo Setup 2025.2.323.exe` dosyasını indirin.
+2. **Çalıştır**: İndirilen `Topluyo Setup 2025.2.323.exe` dosyasını açın.
 3. **Yükleme**: Ekrandaki talimatları izleyerek kurulumu tamamlayın.
 
 ## Kullanım
