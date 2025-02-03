@@ -10,7 +10,7 @@
     "build": "set NODE_ENV=production&& electron-builder --win --x64"
   },
   "author": "Hasan Delibaş, İsmail Han Duman, Ömer Faruk, Topluyo Team",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^33.3.2",
     "electron-builder": "^25.1.8"
