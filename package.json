@@ -1,6 +1,6 @@
 {
   "name": "topluyo",
-  "version": "2025.1.3123",
+  "version": "2025.2.322",
   "description": "Topluyo",
   "main": "main.js",
   "scripts": {
@@ -29,11 +29,10 @@
     "files": [
       "build/**/*",
       "node_modules/**/*",
-      "main.js",
-      "preload.js",
       "*.html",
       "icons/*",
-      "*.rtf"
+      "*.rtf",
+      "*.js"
     ],
     "win": {
       "target": "nsis",

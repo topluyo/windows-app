@@ -26,8 +26,7 @@ jobs:
 
       - name: Build Electron App
         run: |
-          npx electron-builder --dir
-          npx electron-builder --win --x64
+          npm run build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token'ı buraya ekliyoruz
 
