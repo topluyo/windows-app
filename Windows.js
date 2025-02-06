@@ -92,7 +92,7 @@ function createMainWindow(mainWindowState) {
 function LoadingWindowCreate() {
   //* create Loading Window Settings
   const loadingWindow = new BrowserWindow({
-    width: 400,
+    width: 500,
     height: 300,
     frame: false,
     alwaysOnTop: true,
@@ -119,8 +119,11 @@ const loadMainWindow = (url, mainWindow, loadingWindow) => {
     .then(() => {
       loadingWindow.hide();
       mainWindow.show();
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
+      if(url){
+        //* fix auto focus issue
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+      }
       currentRetry = 0;
     })
     .catch(() => {
@@ -139,15 +142,17 @@ const loadMainWindow = (url, mainWindow, loadingWindow) => {
 //* Update Window BrowserWindow
 function createUpdateWindow() {
   const updateWindow = new BrowserWindow({
-    width: 400,
+    width: 500,
     height: 300,
     frame: false,
     alwaysOnTop: true,
-    // transparent: true,
+    transparent: true,
     resizable: false,
     icon: path.join(app.getAppPath(), "topluyo.png"),
     webPreferences: {
+      nodeIntegration: true,
       contextIsolation: false,
+      enableRemoteModule:false
     },
   });
   updateWindow.loadFile("update.html");
@@ -172,20 +177,29 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
   autoUpdater.autoInstallOnAppQuit = false; // Uygulama kapanmadan yükleme
 
   autoUpdater.on("checking-for-update", () => {
-    console.log("Güncellemeler kontrol ediliyor...");
+    updateWindow.webContents.send(
+      "update-message",
+      "🔍 Güncellemeler kontrol ediliyor..."
+    );
   });
 
   autoUpdater.on("update-available", () => {
-    console.log("Güncelleme bulundu. İndiriliyor...");
+    updateWindow.webContents.send(
+      "update-message",
+      "✅ Güncelleme bulundu. İndirme başlatılıyor..."
+    );
   });
 
   autoUpdater.on("error", (error) => {
-    console.error("Güncelleme hatası:", error);
+    updateWindow.webContents.send(
+      "update-message",
+      "❌ Güncelleme hatası: " + error.message
+    );
 
     dialog.showMessageBox({
       type: "error",
       title: "Güncelleme Hatası",
-      message: "Güncelleme sırasında bir hata oluştu." + error,
+      message: "Güncelleme sırasında bir hata oluştu. \n" + error.message,
     });
 
     updateWindow.close();
@@ -199,7 +213,10 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
   });
 
   autoUpdater.on("update-not-available", () => {
-    console.log("Güncelleme bulunamadı.");
+    updateWindow.webContents.send(
+      "update-message",
+      "🚀 Güncelleme bulunamadı."
+    );
     updateWindow.close();
     if (!mainWindow || !loadingWindow) {
       const mainWindow = createMainWindow(mainWindowState);
@@ -209,12 +226,24 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
       loadMainWindow(url, mainWindow, loadingWindow);
     }
   });
+  autoUpdater.on("download-progress", (progressObj) => {
+    updateWindow.webContents.send("download-progress", {
+      percent: progressObj.percent,
+      speed: (progressObj.bytesPerSecond / 1024).toFixed(2) + " KB/s",
+      totalSize: (progressObj.total / (1024 * 1024)).toFixed(2) + " MB",
+    });
+  });
 
   autoUpdater.on("update-downloaded", () => {
-    console.log("🎉 Güncelleme indirildi. Uygulama yeniden başlatılıyor...");
+    updateWindow.webContents.send(
+      "update-message",
+      "🎉 Güncelleme indirildi. Uygulama yeniden başlatılıyor..."
+    );
 
-    updateWindow.close();
-    autoUpdater.quitAndInstall(true, true);
+    setTimeout(() => {
+      updateWindow.close();
+      autoUpdater.quitAndInstall(true, true);
+    }, 2000);
   });
 
   autoUpdater.checkForUpdatesAndNotify();

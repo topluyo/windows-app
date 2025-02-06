@@ -1,25 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <title>Güncelleniyor...</title>
     <style>
-      html{
+      html {
         -webkit-app-region: drag;
+        background: url("./icons/loadingBackgroundImg.gif") repeat center center
+          fixed;
+        background-size: cover;
       }
+
       body {
-        font-family: Arial, sans-serif;
+        margin: 0;
+        height: 100vh;
+        font-family: "Arial", sans-serif;
         text-align: center;
-        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.6); /* Arka planı hafif karartma */
+        color: #fff;
       }
-      button {
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
+
+      #status {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      #progress-container {
+        width: 450px;
+        max-width: 450px;
+        height: 15px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      #progress-bar {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #4caf50, #8bc34a);
+        transition: width 0.3s ease-in-out;
+        border-radius: 10px;
+      }
+
+      #progress-text {
+        font-size: 24px;
+        margin-top: 10px;
+        font-weight: bold;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+      }
+      .progress {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
       }
     </style>
   </head>
   <body>
-    <h1>Güncelleme indiriliyor. Lütfen bekleyin...</h1>
+    <h1 id="status">🔍 Güncellemeler kontrol ediliyor...</h1>
+    <div class="progress">
+      <div id="progress-container">
+        <div id="progress-bar"></div>
+      </div>
+      <p id="progress-text">0%</p>
+    </div>
   </body>
+  <script defer>
+    const { ipcRenderer } = require("electron");
+
+    ipcRenderer.on("update-message", (_, message) => {
+      document.getElementById("status").innerText = message;
+      if(message == "🔍 Güncellemeler kontrol ediliyor..." || message == "❌ Güncelleme hatası: " || message == "🚀 Güncelleme bulunamadı."){
+        document.getElementsByClassName("progress")[0].style.display = "none";
+      }else{
+        document.getElementsByClassName("progress")[0].style.display = "flex";
+      }
+    });
+
+    ipcRenderer.on("download-progress", (_, progress) => {
+      document.getElementById("progress-bar").style.width =
+        progress.percent + "%";
+      document.getElementById("progress-text").innerText =
+        Math.round(progress.percent) + "%";
+    });
+  </script>
 </html>
