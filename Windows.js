@@ -53,12 +53,6 @@ function createMainWindow(mainWindowState) {
     }));
   });
 
-  mainWindow.on("close", function (e) {
-    e.preventDefault();
-    mainWindow.destroy();
-    if (process.platform !== "darwin") app.quit();
-  });
-
   const globalKeyboardListener = new GlobalKeyboardListener();
   let lastDown = {};
   let lastEvent = {};
@@ -83,9 +77,24 @@ function createMainWindow(mainWindowState) {
     mainWindow.webContents.send("keyaction", keyboardEvent);
   });
 
+  mainWindow.webContents.send("get-Startup", app.getLoginItemSettings().openAtLogin);
+
+  ipcMain.on("set-Startup", (event,arg)=>{
+    app.setLoginItemSettings({
+      openAtLogin: typeof arg === "boolean" ? arg : true,
+    })
+  })
+
   if (process.env.NODE_ENV === "development") {
     mainWindow.webContents.openDevTools();
   }
+
+  mainWindow.on("close", function (e) {
+    e.preventDefault();
+    mainWindow.destroy();
+    if (process.platform !== "darwin") app.quit();
+  });
+
   return mainWindow;
 }
 //* Loading Window BrowserWindow
@@ -119,7 +128,7 @@ const loadMainWindow = (url, mainWindow, loadingWindow) => {
     .then(() => {
       loadingWindow.hide();
       mainWindow.show();
-      if(url){
+      if (url) {
         //* fix auto focus issue
         if (mainWindow.isMinimized()) mainWindow.restore();
         mainWindow.focus();
@@ -152,7 +161,7 @@ function createUpdateWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      enableRemoteModule:false
+      enableRemoteModule: false,
     },
   });
   updateWindow.loadFile("update.html");

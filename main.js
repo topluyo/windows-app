@@ -10,10 +10,6 @@ const {isSafeUrl} = require("./utils");
 
 let mainWindow, loadingWindow;
 
-//* App Settings
-app.setLoginItemSettings({
-  openAtLogin: true,
-});
 //* App Protocol Handler
 if (!app.isDefaultProtocolClient("topluyo")) {
   app.setAsDefaultProtocolClient("topluyo");

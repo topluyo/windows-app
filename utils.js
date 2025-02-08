@@ -93,14 +93,14 @@ function MediaRequestHandler(request, callback) {
 
 //* URL Safety Function
 function isSafeUrl(url) {
-    try {
-      const parsedUrl = new URL(url);
-      return (
-        parsedUrl.origin === "https://topluyo.com" &&
-        parsedUrl.protocol === "https:"
-      ); // Tam eşleşme kontrolü
-    } catch (e) {
-      return false;
-    }
+  try {
+    const parsedUrl = new URL(url);
+    return (
+      parsedUrl.origin === "https://topluyo.com" &&
+      parsedUrl.protocol === "https:"
+    ); // Tam eşleşme kontrolü
+  } catch (e) {
+    return false;
   }
+}
 module.exports = { MediaRequestHandler, isSafeUrl };
