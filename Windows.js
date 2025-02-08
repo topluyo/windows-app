@@ -77,8 +77,6 @@ function createMainWindow(mainWindowState) {
     mainWindow.webContents.send("keyaction", keyboardEvent);
   });
 
-  mainWindow.webContents.send("get-Startup", app.getLoginItemSettings().openAtLogin);
-
   ipcMain.on("set-Startup", (event,arg)=>{
     app.setLoginItemSettings({
       openAtLogin: typeof arg === "boolean" ? arg : true,
