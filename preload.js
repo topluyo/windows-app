@@ -19,5 +19,10 @@ window.addEventListener("DOMContentLoaded", () => {
   ipcRenderer.on("keyaction",function(event,arguments){
     AppKeyAction(arguments)
   })
+  
+  documenter.on("input","#run-on-startup",function(){
+    ipcRenderer.send("run-on-startup", this.checked);
+  })
+
 });
 
