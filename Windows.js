@@ -9,8 +9,7 @@ const {
 const path = require("path");
 const { autoUpdater } = require("electron-updater");
 const { GlobalKeyboardListener } = require("node-global-key-listener");
-
-const { MediaRequestHandler } = require("./utils");
+const {mediaHandler} = require("./utils")
 
 //* Main Window BrowserWindow
 function createMainWindow(mainWindowState) {
@@ -37,21 +36,7 @@ function createMainWindow(mainWindowState) {
 
   mainWindow.hide();
 
-  session.defaultSession.setDisplayMediaRequestHandler(MediaRequestHandler, {
-    useSystemPicker: false,
-  });
-
-  ipcMain.handle("get-sources", async () => {
-    const sources = await desktopCapturer.getSources({
-      types: ["screen", "window"],
-      fetchWindowIcons: true,
-    });
-    return sources.map((source) => ({
-      id: source.id,
-      name: source.name,
-      thumbnail: source.thumbnail.toDataURL(),
-    }));
-  });
+  session.defaultSession.setDisplayMediaRequestHandler(mediaHandler);
 
   const globalKeyboardListener = new GlobalKeyboardListener();
   let lastDown = {};
@@ -77,11 +62,11 @@ function createMainWindow(mainWindowState) {
     mainWindow.webContents.send("keyaction", keyboardEvent);
   });
 
-  ipcMain.on("set-Startup", (event,arg)=>{
+  ipcMain.on("set-Startup", (event, arg) => {
     app.setLoginItemSettings({
       openAtLogin: typeof arg === "boolean" ? arg : true,
-    })
-  })
+    });
+  });
 
   if (process.env.NODE_ENV === "development") {
     mainWindow.webContents.openDevTools();
@@ -255,6 +240,8 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
 
   autoUpdater.checkForUpdatesAndNotify();
 }
+
+//* Stream Window
 
 module.exports = {
   createMainWindow,

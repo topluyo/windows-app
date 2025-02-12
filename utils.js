@@ -1,95 +1,90 @@
-const {
-  app,
-  BrowserWindow,
-  ipcMain,
-  desktopCapturer,
-  dialog,
-} = require("electron");
+const { ipcMain, desktopCapturer, BrowserWindow, dialog, app } = require("electron");
 const path = require("path");
-//* Media Handler BrowserWindow
-function showSourceSelectionWindow(sources, callback) {
-  const selectionWindow = new BrowserWindow({
+
+const getAllSources = async () => {
+  try {
+    const sources = await desktopCapturer.getSources({
+      types: ["window", "screen"],
+    });
+    return sources.map((source) => ({
+      name: source.name,
+      id: source.id,
+      thumbnail: source.thumbnail.toDataURL(),
+    }));
+  } catch (e) {
+    throw e;
+  }
+};
+
+async function createStreamWindow  (_, callback) {
+  console.log(callback);
+  let callbackcalled = false;
+  const win = new BrowserWindow({
     width: 620,
     height: 400,
     autoHideMenuBar: true,
     icon: path.join(app.getAppPath(), "topluyo.png"),
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true,
+      enableRemoteModule: true,
+      preload: path.join(__dirname, "preload.js"),
     },
   });
+  win.loadFile("ScreenShare.html");
 
-  selectionWindow.loadFile("./ScreenShare.html");
+  const allSources = await getAllSources();
 
-  let success = false;
-  ipcMain.once("source-selected", (event, data) => {
-    callback(data);
-    success = true;
+  ipcMain.handle("setSource", async (_, data) => {
+    if (callbackcalled) return;
+    const selectedSource = allSources.find((s) => s.id === data.id);
     try {
-      selectionWindow.close();
+      if (!selectedSource) {
+        throw new Error("Source not found");
+      }
+      callbackcalled = true;
+      let stream = { video: selectedSource };
+      if (data.isAudioEnabled) {
+        stream.audio = "loopback";
+      }
+      callback(stream);
+      ipcMain.removeHandler("getSources");
+      ipcMain.removeHandler("setSource");
+      win.close();
     } catch (e) {
-      dialog.showMessageBox({
-        type: "error",
-        title: "Hata",
-        message:
-          "Ekran paylaşımı seçilirken bir hata oluştu. \n Detaylar: " + e,
-      });
+      throw e;
     }
   });
 
-  selectionWindow.on("closed", function () {
-    if (success == false) {
-      callback({ id: false });
+  win.on("close", () => {
+    if (callbackcalled) return;
+    callbackcalled = true;
+    try {
+      ipcMain.removeHandler("getSources");
+      ipcMain.removeHandler("setSource");
+
+      callback(null);
+    } catch (e) {
+      throw e;
     }
   });
-}
+};
 
-//* Media Handler Function
-function MediaRequestHandler(request, callback) {
-  desktopCapturer
-    .getSources({
-      types: ["screen", "window"],
-      thumbnailSize: { width: 300, height: 300 },
-    })
-    .then((sources) => {
-      showSourceSelectionWindow(sources, (data) => {
-        let id = data.id;
-        if (id) {
-          const source = sources.find((source) => source.id === id);
-          let stream = { video: source };
-          if (data.audio) stream.audio = "loopback";
-          try {
-            callback(stream);
-          } catch (e) {
-            dialog.showMessageBox({
-              type: "error",
-              title: "Hata",
-              message:
-                "Ekran paylaşımı sırasında bir hata oluştu. \n Detaylar: " + e,
-            });
-          }
-        } else {
-          try {
-            callback(null);
-          } catch (e) {
-            dialog.showMessageBox({
-              type: "error",
-              title: "Hata",
-              message:
-                "Ekran paylaşımı sırasında bir hata oluştu. \n Detaylar: " + e,
-            });
-          }
-        }
-      });
-    })
-    .catch((e) => {
-      dialog.showMessageBox({
-        type: "error",
-        title: "Hata",
-        message: "Ekran paylaşımı sırasında bir hata oluştu. \n Detaylar: " + e,
-      });
+const mediaHandler = async (req, callback) => {
+  try {
+    ipcMain.removeHandler("setSource");
+    ipcMain.removeHandler("getSources");
+
+    const allSources = await getAllSources();
+    ipcMain.handle("getSources", async () => {
+      return allSources;
     });
-}
+
+    await createStreamWindow(req, callback);
+  } catch (e) {
+    dialog.showErrorBox("Error", "hata:" + e.message);
+  }
+};
 
 //* URL Safety Function
 function isSafeUrl(url) {
@@ -98,9 +93,9 @@ function isSafeUrl(url) {
     return (
       parsedUrl.origin === "https://topluyo.com" &&
       parsedUrl.protocol === "https:"
-    ); // Tam eşleşme kontrolü
+    );
   } catch (e) {
     return false;
   }
 }
-module.exports = { MediaRequestHandler, isSafeUrl };
+module.exports = { isSafeUrl, mediaHandler };

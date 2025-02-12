@@ -1,5 +1,5 @@
 // preload.js
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, contextBridge } = require("electron");
 
 window.addEventListener("DOMContentLoaded", () => {
   window.closeWindow = () => {
@@ -22,4 +22,10 @@ window.addEventListener("DOMContentLoaded", () => {
   documenter.on("input", "#run-on-startup", function () {
     ipcRenderer.send("set-Startup", this.checked);
   });
+});
+
+contextBridge.exposeInMainWorld("stream", {
+  getSources: () => ipcRenderer.invoke("getSources"),
+  setSource: (data) =>
+    ipcRenderer.invoke("setSource", { id:data.id, isAudioEnabled:data.audio }),
 });
