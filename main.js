@@ -68,7 +68,7 @@ if (!app.requestSingleInstanceLock()) {
             message: "Bu bağlantıyı açmak istiyor musunuz?\n" + url,
           })
           .then((response) => {
-            if (response.response === 0) {
+            if (response.response !== 1) {
               shell.openExternal(url);
             }
           });
