@@ -10,7 +10,11 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Check out code
@@ -26,7 +30,11 @@ jobs:
 
       - name: Build Electron App
         run: |
-          npm run build
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            npm run build:linux
+          else
+            npm run build:win
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token'ı buraya ekliyoruz
 

@@ -2,7 +2,6 @@ const {
   app,
   BrowserWindow,
   ipcMain,
-  desktopCapturer,
   session,
   dialog,
 } = require("electron");
@@ -240,8 +239,6 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
 
   autoUpdater.checkForUpdatesAndNotify();
 }
-
-//* Stream Window
 
 module.exports = {
   createMainWindow,

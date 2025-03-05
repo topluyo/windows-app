@@ -7,7 +7,8 @@
     "start": "set NODE_ENV=production&& electron .",
     "dev": "set NODE_ENV=development&& electron .",
     "installer": "electron-builder --win --x64",
-    "build": "set NODE_ENV=production&& electron-builder --win --x64"
+    "build:win": "set NODE_ENV=production&& electron-builder --win --x64",
+    "build:linux": "electron-builder --linux"
   },
   "author": "Hasan Delibaş, İsmail Han Duman, Topluyo Team",
   "license": "MIT",
@@ -39,13 +40,19 @@
       "icon": "build/icon.ico",
       "artifactName": "Topluyo-Setup-${version}.exe"
     },
+    "linux":{
+      "target": ["AppImage", "deb"],
+      "icon": "build/icon.png",
+      "artifactName": "Topluyo-${version}.${ext}"
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Topluyo",
-      "license":"kullanici_sozlesmesi.rtf"
+      "license":"kullanici_sozlesmesi.rtf",
+      "deleteAppDataOnUninstall": true
     },
     "publish": [
       {
