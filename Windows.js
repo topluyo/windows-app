@@ -188,7 +188,7 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
       "❌ Güncelleme hatası: " + error.message
     );
 
-    if (error.message !== "net::ERR_INTERNET_DISCONNECTED") {
+    if (error.message !== "net::ERR_INTERNET_DISCONNECTED" && error.message !== "net::ERR_NAME_NOT_RESERVED") {
       dialog.showMessageBox({
       type: "error",
       title: "Güncelleme Hatası",
