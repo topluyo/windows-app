@@ -10,11 +10,11 @@ permissions:
 
 jobs:
   buildExe:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
+    # strategy:
+    #   matrix:
+    #     os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Check out code
@@ -28,16 +28,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+        # |
+        #   if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+        #     npm run build:linux
+        #   else
+        #     npm run build:winexe
+        #   fi
       - name: Build Electron App
-          # if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-          #   npm run build:linux
-          # else
-          #   npm run build:win
-          # fi
-        run: |
-          if [ "${{ matrix.os}}" == "windows-latest"]; then
-            npm run build:winexe
-          fi
+        run: npm run build:winexe
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
