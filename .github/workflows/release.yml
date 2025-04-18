@@ -9,8 +9,12 @@ permissions:
   contents: write # add permission for organization
 
 jobs:
-  build:
-    runs-on: windows-latest
+  buildExe:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Check out code
@@ -25,10 +29,17 @@ jobs:
         run: npm install
 
       - name: Build Electron App
+          # if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          #   npm run build:linux
+          # else
+          #   npm run build:win
+          # fi
         run: |
-          npm run build
+          if [ "${{ matrix.os}}" == "windows-latest"]; then
+            npm run build:winexe
+          fi
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token'ı buraya ekliyoruz
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -36,3 +47,31 @@ jobs:
             files: dist/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # buildStore:
+  #   runs-on: windows-latest
+
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+      
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '20'
+
+  #     - name: Install dependencies
+  #       run: npm install
+
+  #     - name: Build Electron App
+  #       run: npm run build:winstore
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: Upload Microsoft Release
+  #       uses: windows-store-publish@v1
+  #       with:
+  #         package-path: 'dist/*.appx'
+  #         appId: ${{ secrets.WINDOWS_STORE_APP_ID }}
+  #         publisherId: ${{ secrets.WINDOWS_STORE_PUBLISHER_ID }}
+  #         skipSigning: true 

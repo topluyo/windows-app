@@ -1,4 +1,4 @@
-const { ipcMain, desktopCapturer, BrowserWindow, dialog, app } = require("electron");
+const { ipcMain, desktopCapturer, BrowserWindow, dialog, app, shell } = require("electron");
 const path = require("path");
 
 const getAllSources = async () => {
@@ -98,4 +98,12 @@ function isSafeUrl(url) {
     return false;
   }
 }
-module.exports = { isSafeUrl, mediaHandler };
+
+const openExternalLinks = (url)=>{
+  if (process.platform === "linux") {
+    require("child_process").exec(`xdg-open "${url}"`);
+  } else {
+    shell.openExternal(url);
+  }
+}
+module.exports = { isSafeUrl, mediaHandler, openExternalLinks };

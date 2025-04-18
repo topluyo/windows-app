@@ -2,7 +2,6 @@ const {
   app,
   BrowserWindow,
   ipcMain,
-  desktopCapturer,
   session,
   dialog,
 } = require("electron");
@@ -154,7 +153,7 @@ function createUpdateWindow() {
 //* Check for Updates and Load Main Window with URL
 function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
   const updateWindow = createUpdateWindow();
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV === "development" || process.env.STOREBUILD) {
     updateWindow.close();
     if (!mainWindow || !loadingWindow) {
       const mainWindow = createMainWindow(mainWindowState);
@@ -242,8 +241,6 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
 
   autoUpdater.checkForUpdatesAndNotify();
 }
-
-//* Stream Window
 
 module.exports = {
   createMainWindow,

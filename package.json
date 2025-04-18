@@ -1,13 +1,17 @@
 {
   "name": "topluyo",
-  "version": "2025.3.503",
+  "version": "2025.4.415",
   "description": "Topluyo",
   "main": "main.js",
   "scripts": {
     "start": "set NODE_ENV=production&& electron .",
     "dev": "set NODE_ENV=development&& electron .",
+    "clean": "rm -rf dist",
+    "clear": "rmdir /s /q dist",
     "installer": "electron-builder --win --x64",
-    "build": "set NODE_ENV=production&& electron-builder --win --x64"
+    "build:winexe": "npm run clear && set NODE_ENV=production&& set STOREBUILD=false&& electron-builder --win --x64 --config.win.target=nsis",
+    "build:winstore": "npm run clear && set NODE_ENV=production&& set STOREBUILD=true&& electron-builder --win --x64 --config.win.target=appx",
+    "build:linux": "npm run clean && electron-builder --linux"
   },
   "author": "Hasan Delibaş, İsmail Han Duman, Topluyo Team",
   "license": "MIT",
@@ -35,9 +39,16 @@
       "*.js"
     ],
     "win": {
-      "target": "nsis",
+      "target": ["nsis", "appx"],
       "icon": "build/icon.ico",
-      "artifactName": "Topluyo-Setup-${version}.exe"
+      "artifactName": "Topluyo-Setup-${version}.${ext}"
+    },
+    "appx": {
+      "identityName": "Topluyo.Topluyo",
+      "publisher": "CN=B644B811-3CB1-46E2-8448-9423A6C95D4A",
+      "publisherDisplayName": "Topluyo",
+      "languages": "tr-TR",
+      "backgroundColor": "#191819"
     },
     "nsis": {
       "oneClick": false,
@@ -45,7 +56,13 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Topluyo",
-      "license":"kullanici_sozlesmesi.rtf"
+      "license": "kullanici_sozlesmesi.rtf",
+      "deleteAppDataOnUninstall": true
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "build/icon.png",
+      "artifactName": "Topluyo-${version}.${ext}"
     },
     "publish": [
       {
