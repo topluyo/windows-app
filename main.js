@@ -54,13 +54,13 @@ MimeType=x-scheme-handler/topluyo;
 
 //* App Single Instance Handler
 if (!app.requestSingleInstanceLock()) {
-  if(process.platform === "win32"){
+  if (process.platform === "win32") {
     app.quit();
   }
   app.exit();
 } else {
   app.on("second-instance", (event, commandLine) => {
-    // Windows için URL'yi al
+    // Windows ve Linux için URL'yi al
     const url = commandLine.find((arg) => arg.startsWith("topluyo://"));
     if (url && mainWindow) {
       loadMainWindow(url.replace("topluyo://", ""), mainWindow, loadingWindow);
@@ -79,7 +79,7 @@ if (!app.requestSingleInstanceLock()) {
 
     let cleanUrl = null;
     //* Check for updates and start app with url if there is any
-    if(process.platform === "win32"){
+    if (process.platform === "win32") {
       const url = process.argv.find((arg) => arg.startsWith("topluyo://"));
       cleanUrl = url ? url.replace("topluyo://", "") : null;
     }
@@ -134,9 +134,9 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 app.on("window-all-closed", function () {
-  if(process.platform === "win32"){
+  if (process.platform === "win32") {
     app.quit();
-  }else{
+  } else {
     app.exit();
   }
 });
