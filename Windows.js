@@ -187,11 +187,13 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
       "❌ Güncelleme hatası: " + error.message
     );
 
-    dialog.showMessageBox({
+    if (error.message !== "net::ERR_INTERNET_DISCONNECTED" && error.message !== "net::ERR_NAME_NOT_RESERVED") {
+      dialog.showMessageBox({
       type: "error",
       title: "Güncelleme Hatası",
       message: "Güncelleme sırasında bir hata oluştu. \n" + error.message,
-    });
+      });
+    }
 
     updateWindow.close();
     if (!mainWindow || !loadingWindow) {
