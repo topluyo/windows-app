@@ -239,7 +239,7 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
     }, 2000);
   });
 
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdates();
 }
 
 module.exports = {
