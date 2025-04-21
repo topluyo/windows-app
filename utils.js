@@ -90,7 +90,7 @@ const mediaHandler = async (req, callback) => {
 function isSafeUrl(url) {
   try {
     const parsedUrl = new URL(url);
-    if (parsedUrl.search && parsedUrl.search.includes("?!login")) {
+    if (parsedUrl.search && parsedUrl.search.includes("!login")) {
       return false;
     }
     return (
