@@ -1,11 +1,12 @@
 {
   "name": "topluyo",
-  "version": "2025.4.1822",
+  "version": "2025.4.2115",
   "description": "Topluyo",
   "main": "main.js",
   "scripts": {
     "start": "set NODE_ENV=production&& electron .",
     "dev": "set NODE_ENV=development&& electron .",
+    "devbuild": "set NODE_ENV=development&& electron-builder --win --x64 --config.win.target=nsis",
     "clean": "rm -rf dist",
     "clear": "if exist dist rmdir /s /q dist",
     "installer": "electron-builder --win --x64",

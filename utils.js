@@ -90,6 +90,9 @@ const mediaHandler = async (req, callback) => {
 function isSafeUrl(url) {
   try {
     const parsedUrl = new URL(url);
+    if (parsedUrl.search && parsedUrl.search.includes("?!login")) {
+      return false;
+    }
     return (
       parsedUrl.origin === "https://topluyo.com" &&
       parsedUrl.protocol === "https:"
