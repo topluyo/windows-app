@@ -7,6 +7,7 @@ const {
   loadMainWindow,
 } = require("./Windows");
 const { isSafeUrl, openExternalLinks } = require("./utils");
+const { URL } = require("url");
 
 let mainWindow, loadingWindow;
 
@@ -103,7 +104,11 @@ if (!app.requestSingleInstanceLock()) {
       } else if (url.startsWith("javascript:")) {
         return { action: "deny" };
       } else {
-        dialog
+        const parsedUrl = new URL(url)
+        if (parsedUrl.search && parsedUrl.search.includes("!login")) {
+          shell.openExternal(url);
+        }else{
+          dialog
           .showMessageBox({
             type: "warning",
             buttons: ["Evet", "Hayır"],
@@ -116,6 +121,7 @@ if (!app.requestSingleInstanceLock()) {
               shell.openExternal(url);
             }
           });
+        }
         return { action: "deny" };
       }
     });
