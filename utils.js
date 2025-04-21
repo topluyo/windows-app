@@ -1,4 +1,11 @@
-const { ipcMain, desktopCapturer, BrowserWindow, dialog, app, shell } = require("electron");
+const {
+  ipcMain,
+  desktopCapturer,
+  BrowserWindow,
+  dialog,
+  app,
+  shell,
+} = require("electron");
 const path = require("path");
 
 const getAllSources = async () => {
@@ -16,7 +23,7 @@ const getAllSources = async () => {
   }
 };
 
-async function createStreamWindow  (_, callback) {
+async function createStreamWindow(_, callback) {
   console.log(callback);
   let callbackcalled = false;
   const win = new BrowserWindow({
@@ -68,7 +75,7 @@ async function createStreamWindow  (_, callback) {
       throw e;
     }
   });
-};
+}
 
 const mediaHandler = async (req, callback) => {
   try {
@@ -90,23 +97,25 @@ const mediaHandler = async (req, callback) => {
 function isSafeUrl(url) {
   try {
     const parsedUrl = new URL(url);
-    if (parsedUrl.search && parsedUrl.search.includes("!login")) {
-      return false;
-    }
-    return (
+    if (
       parsedUrl.origin === "https://topluyo.com" &&
       parsedUrl.protocol === "https:"
-    );
+    ) {
+      if (parsedUrl.search && parsedUrl.search.includes("!login")) {
+        return false;
+      }
+      return true;
+    }
   } catch (e) {
     return false;
   }
 }
 
-const openExternalLinks = (url)=>{
+const openExternalLinks = (url) => {
   if (process.platform === "linux") {
     require("child_process").exec(`xdg-open "${url}"`);
   } else {
     shell.openExternal(url);
   }
-}
+};
 module.exports = { isSafeUrl, mediaHandler, openExternalLinks };
