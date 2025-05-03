@@ -3,18 +3,17 @@ name: Build and Release Electron App
 on:
   push:
     tags:
-      - 'v*'  # Sadece versiyon etiketlerine tepki verir (v1.0.0 gibi)
+      - 'v*.*.*' # Trigger on version tags like v1.0.0
 
 permissions:
   contents: write # add permission for organization
 
 jobs:
   buildExe:
-    runs-on: windows-latest
-
-    # strategy:
-    #   matrix:
-    #     os: [ubuntu-latest, windows-latest]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out code
@@ -28,14 +27,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-        # |
-        #   if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-        #     npm run build:linux
-        #   else
-        #     npm run build:winexe
-        #   fi
       - name: Build Electron App
-        run: npm run build:winexe
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            npm run build:linux
+          else
+            npm run build:winexe
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

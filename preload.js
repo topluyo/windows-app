@@ -15,10 +15,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.body.classList.add("electron-app");
 
-  ipcRenderer.on("keyaction", function (event, arguments) {
-    AppKeyAction(arguments);
-  });
-
   documenter.on("input", "#run-on-startup", function () {
     ipcRenderer.send("set-Startup", this.checked);
   });

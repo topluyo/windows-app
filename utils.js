@@ -113,7 +113,8 @@ function isSafeUrl(url) {
 
 const openExternalLinks = (url) => {
   if (process.platform === "linux") {
-    require("child_process").exec(`xdg-open "${url}"`);
+    const newUrl = new URL(url);
+    require("child_process").exec(`xdg-open "${newUrl}"`);
   } else {
     shell.openExternal(url);
   }

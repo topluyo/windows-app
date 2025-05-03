@@ -7,7 +7,6 @@ const {
 } = require("electron");
 const path = require("path");
 const { autoUpdater } = require("electron-updater");
-const { GlobalKeyboardListener } = require("node-global-key-listener");
 const {mediaHandler} = require("./utils")
 
 //* Main Window BrowserWindow
@@ -36,30 +35,6 @@ function createMainWindow(mainWindowState) {
   mainWindow.hide();
 
   session.defaultSession.setDisplayMediaRequestHandler(mediaHandler);
-
-  const globalKeyboardListener = new GlobalKeyboardListener();
-  let lastDown = {};
-  let lastEvent = {};
-  globalKeyboardListener.addListener(function (event, down) {
-    if (
-      JSON.stringify(lastDown) === JSON.stringify(down) &&
-      JSON.stringify(lastEvent.name) === JSON.stringify(event.name) &&
-      JSON.stringify(lastEvent.state) === JSON.stringify(event.state)
-    )
-      return;
-
-    lastDown = down;
-    lastEvent = event;
-    let type = event.state === "DOWN" ? "keydown" : "keyup";
-    let ctrlKey = down["LEFT CTRL"] || down["RIGHT CTRL"] || false;
-    let altKey = down["LEFT ALT"] || down["RIGHT ALT"] || false;
-    let metaKey = down["LEFT META"] || down["RIGHT META"] || false;
-    let shiftKey = down["LEFT SHIFT"] || down["RIGHT SHIFT"] || false;
-    let code = "Key" + event.name;
-
-    let keyboardEvent = { type, ctrlKey, altKey, metaKey, shiftKey, code };
-    mainWindow.webContents.send("keyaction", keyboardEvent);
-  });
 
   ipcMain.on("set-Startup", (event, arg) => {
     app.setLoginItemSettings({

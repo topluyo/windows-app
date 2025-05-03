@@ -1,6 +1,6 @@
 {
   "name": "topluyo",
-  "version": "2025.4.2118",
+  "version": "2025.5.315",
   "description": "Topluyo",
   "main": "main.js",
   "scripts": {
@@ -22,8 +22,7 @@
   },
   "dependencies": {
     "electron-updater": "^6.3.9",
-    "electron-window-state": "^5.0.3",
-    "node-global-key-listener": "^0.3.0"
+    "electron-window-state": "^5.0.3"
   },
   "build": {
     "appId": "com.topluyo.app",
@@ -40,7 +39,10 @@
       "*.js"
     ],
     "win": {
-      "target": ["nsis", "appx"],
+      "target": [
+        "nsis",
+        "appx"
+      ],
       "icon": "build/icon.ico",
       "artifactName": "Topluyo-Setup-${version}.${ext}"
     },
@@ -61,7 +63,10 @@
       "deleteAppDataOnUninstall": true
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "icon": "build/icon.png",
       "artifactName": "Topluyo-${version}.${ext}"
     },
