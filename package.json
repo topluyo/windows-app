@@ -63,12 +63,13 @@
       "deleteAppDataOnUninstall": true
     },
     "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "icon": "build/icon.png",
-      "artifactName": "Topluyo-${version}.${ext}"
+      "target": ["AppImage", "deb"],
+      "icon": "icons/png/256x256.png",
+      "category": "Utility",
+      "description": "Topluyo",
+      "executableName": "Topluyo",
+      "artifactName": "Topluyo-${version}.${ext}",
+      "maintainer": "Hasan Delibaş <info@topluyo.com>"
     },
     "publish": [
       {
