@@ -1,6 +1,6 @@
 {
   "name": "topluyo",
-  "version": "2025.5.315",
+  "version": "2025.5.1518",
   "description": "Topluyo",
   "main": "main.js",
   "scripts": {
@@ -75,7 +75,7 @@
       {
         "provider": "github",
         "owner": "topluyo",
-        "repo": "windows-app"
+        "repo": "app"
       }
     ]
   }
