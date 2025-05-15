@@ -141,6 +141,7 @@ function checkForUpdates(url, mainWindow, loadingWindow, mainWindowState) {
   }
   autoUpdater.autoDownload = true; // Sessiz indir
   autoUpdater.autoInstallOnAppQuit = false; // Uygulama kapanmadan yükleme
+  autoUpdater.setFeedURL({provider: "github", owner: "topluyo", repo: "app"}) // change repo
 
   autoUpdater.on("checking-for-update", () => {
     updateWindow.webContents.send(
